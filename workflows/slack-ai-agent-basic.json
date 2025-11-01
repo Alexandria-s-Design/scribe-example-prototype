@@ -1,0 +1,501 @@
+{
+  "name": "Slack AI Agent - Basic",
+  "nodes": [
+    {
+      "parameters": {
+        "mode": "webhook",
+        "path": "slack-agent",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook (Slack)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "webhookId": "slack-ai-agent"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract Slack message data\nconst body = $input.item.json.body;\n\n// Handle different Slack event types\nif (body.type === 'url_verification') {\n  // Slack verification challenge\n  return [{\n    json: {\n      challenge: body.challenge\n    }\n  }];\n}\n\n// Extract message from event\nconst event = body.event || {};\nconst text = event.text || '';\nconst user = event.user || '';\nconst channel = event.channel || '';\nconst ts = event.ts || '';\nconst thread_ts = event.thread_ts || ts;\n\n// Remove bot mention from text\nconst cleanText = text.replace(/<@[A-Z0-9]+>/g, '').trim();\n\nreturn [{\n  json: {\n    message: cleanText,\n    user: user,\n    channel: channel,\n    thread_ts: thread_ts,\n    raw_event: event\n  }\n}];"
+      },
+      "id": "extract-message",
+      "name": "Extract Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "system-prompt",
+              "name": "system_prompt",
+              "value": "=You are Alexandria, an AI teammate for Alexandria's Design, an educational technology consulting business founded by Charles Martin and Dr. Marie Martin.\n\nBUSINESS CONTEXT:\n- Educational technology consulting for K-12, higher ed, government, military\n- Revenue goal: $30k/month (\"let's get to the bread\")\n- Products: ModelIt! (K-12 AI literacy), Alexandria's World (interactive learning), professional development workshops\n- Focus: AI integration, future-ready practices, scalable solutions\n\nYOUR CAPABILITIES:\n- Email: Office 365 (cmartin@alexandriasdesign.com), Gmail (charlesmartinedd@gmail.com)\n- Calendar: Google Calendar, Office 365 Calendar\n- Projects: Monday.com task tracking\n- Files: OneDrive, SharePoint, Google Drive\n- Financials: LunchMoney tracking (monthly goal: $30k)\n\nAVAILABLE TOOLS:\n- send_email: Send emails via Office 365 or Gmail\n- get_calendar: Retrieve calendar events\n- create_task: Create tasks in Monday.com\n- search_documents: Search OneDrive/Google Drive\n- get_financial_data: Get LunchMoney financial data\n\nPERSONALITY:\n- Professional yet friendly\n- Revenue-focused and practical\n- Proactive with tools\n- Educational expertise from Dr. Marie\n- Technical innovation from Charles\n\nALWAYS:\n- Think revenue-first\n- Use tools when helpful\n- Be concise in Slack\n- Ask clarifying questions\n- Prioritize automation and scale",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-system-prompt",
+      "name": "Set System Prompt",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.3,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "anthropicApi",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "claude-sonnet-4-20250514"
+            },
+            {
+              "name": "max_tokens",
+              "value": "4096"
+            },
+            {
+              "name": "system",
+              "value": "={{ $json.system_prompt }}"
+            },
+            {
+              "name": "messages",
+              "value": "={{ [{\"role\": \"user\", \"content\": $('Extract Message').item.json.message}] }}"
+            },
+            {
+              "name": "tools",
+              "value": "={{ [\n  {\n    \"name\": \"send_email\",\n    \"description\": \"Send an email via Office 365 or Gmail. Use this when the user asks to send, compose, or email something.\",\n    \"input_schema\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"to\": {\n          \"type\": \"string\",\n          \"description\": \"Recipient email address\"\n        },\n        \"subject\": {\n          \"type\": \"string\",\n          \"description\": \"Email subject line\"\n        },\n        \"body\": {\n          \"type\": \"string\",\n          \"description\": \"Email body content\"\n        },\n        \"account\": {\n          \"type\": \"string\",\n          \"enum\": [\"office365\", \"gmail\"],\n          \"description\": \"Email account to use. Use office365 for work emails, gmail for personal.\",\n          \"default\": \"gmail\"\n        }\n      },\n      \"required\": [\"to\", \"subject\", \"body\"]\n    }\n  },\n  {\n    \"name\": \"get_calendar\",\n    \"description\": \"Get calendar events for a date range. Use this when user asks about schedule, meetings, or what's coming up.\",\n    \"input_schema\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"days_ahead\": {\n          \"type\": \"integer\",\n          \"description\": \"Number of days to look ahead\",\n          \"default\": 7\n        },\n        \"account\": {\n          \"type\": \"string\",\n          \"enum\": [\"google\", \"office365\"],\n          \"description\": \"Calendar account to check\",\n          \"default\": \"google\"\n        }\n      }\n    }\n  },\n  {\n    \"name\": \"create_monday_task\",\n    \"description\": \"Create a task or item in Monday.com project boards. Use when user wants to track work, create todos, or manage projects.\",\n    \"input_schema\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"item_name\": {\n          \"type\": \"string\",\n          \"description\": \"Task title or name\"\n        },\n        \"board_id\": {\n          \"type\": \"string\",\n          \"description\": \"Monday.com board ID (ask user if not specified)\"\n        },\n        \"description\": {\n          \"type\": \"string\",\n          \"description\": \"Task description or notes\"\n        }\n      },\n      \"required\": [\"item_name\"]\n    }\n  }\n] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "claude-api-call",
+      "name": "Claude API Call",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "has-tool-use",
+              "leftValue": "={{ $json.content && $json.content.some(block => block.type === 'tool_use') }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-tool-use",
+      "name": "Check for Tool Use",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1120, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract text response from Claude\nconst content = $input.item.json.content || [];\nconst textBlocks = content.filter(block => block.type === 'text');\nconst responseText = textBlocks.map(block => block.text).join('\\n');\n\nreturn [{\n  json: {\n    response: responseText || 'I received your message but had no response.',\n    channel: $('Extract Message').item.json.channel,\n    thread_ts: $('Extract Message').item.json.thread_ts\n  }\n}];"
+      },
+      "id": "format-text-response",
+      "name": "Format Text Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1340, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract tool use from Claude response\nconst content = $input.item.json.content || [];\nconst toolUse = content.find(block => block.type === 'tool_use');\n\nif (!toolUse) {\n  throw new Error('No tool use found in response');\n}\n\nreturn [{\n  json: {\n    tool_name: toolUse.name,\n    tool_input: toolUse.input,\n    tool_use_id: toolUse.id,\n    channel: $('Extract Message').item.json.channel,\n    thread_ts: $('Extract Message').item.json.thread_ts\n  }\n}];"
+      },
+      "id": "extract-tool-call",
+      "name": "Extract Tool Call",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1340, 200]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "rules": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.tool_name }}",
+                    "rightValue": "send_email",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "send_email"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.tool_name }}",
+                    "rightValue": "get_calendar",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "get_calendar"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.tool_name }}",
+                    "rightValue": "create_monday_task",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "create_task"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "id": "tool-router",
+      "name": "Tool Router",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [1560, 200]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "tool-result",
+              "name": "tool_result",
+              "value": "=Email tool execution - connect Office 365 or Gmail node here",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "execute-send-email",
+      "name": "Execute: Send Email",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.3,
+      "position": [1780, 100]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "tool-result",
+              "name": "tool_result",
+              "value": "=Calendar tool execution - connect Google Calendar or Office 365 Calendar node here",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "execute-get-calendar",
+      "name": "Execute: Get Calendar",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.3,
+      "position": [1780, 200]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "tool-result",
+              "name": "tool_result",
+              "value": "=Monday.com tool execution - connect Monday.com node here",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "execute-create-task",
+      "name": "Execute: Create Task",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.3,
+      "position": [1780, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Format tool execution result to send back to Claude\nconst toolResult = $input.item.json.tool_result;\nconst toolUseId = $('Extract Tool Call').item.json.tool_use_id;\n\nreturn [{\n  json: {\n    response: `Tool executed successfully. Result: ${toolResult}`,\n    channel: $('Extract Message').item.json.channel,\n    thread_ts: $('Extract Message').item.json.thread_ts\n  }\n}];"
+      },
+      "id": "format-tool-response",
+      "name": "Format Tool Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2000, 200]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "={{ $json.channel }}",
+          "mode": "id"
+        },
+        "text": "={{ $json.response }}",
+        "otherOptions": {
+          "thread_ts": "={{ $json.thread_ts }}"
+        }
+      },
+      "id": "send-to-slack",
+      "name": "Send to Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [2220, 300],
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "slack-credentials",
+          "name": "Slack Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.challenge || 'OK' }}"
+      },
+      "id": "webhook-response",
+      "name": "Webhook Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [2440, 300]
+    }
+  ],
+  "connections": {
+    "Webhook (Slack)": {
+      "main": [
+        [
+          {
+            "node": "Extract Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Message": {
+      "main": [
+        [
+          {
+            "node": "Set System Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set System Prompt": {
+      "main": [
+        [
+          {
+            "node": "Claude API Call",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude API Call": {
+      "main": [
+        [
+          {
+            "node": "Check for Tool Use",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check for Tool Use": {
+      "main": [
+        [
+          {
+            "node": "Extract Tool Call",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Format Text Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Tool Call": {
+      "main": [
+        [
+          {
+            "node": "Tool Router",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tool Router": {
+      "main": [
+        [
+          {
+            "node": "Execute: Send Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execute: Get Calendar",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execute: Create Task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute: Send Email": {
+      "main": [
+        [
+          {
+            "node": "Format Tool Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute: Get Calendar": {
+      "main": [
+        [
+          {
+            "node": "Format Tool Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute: Create Task": {
+      "main": [
+        [
+          {
+            "node": "Format Tool Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Tool Response": {
+      "main": [
+        [
+          {
+            "node": "Send to Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Text Response": {
+      "main": [
+        [
+          {
+            "node": "Send to Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send to Slack": {
+      "main": [
+        [
+          {
+            "node": "Webhook Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2025-11-01T00:00:00.000Z",
+  "versionId": "1"
+}
