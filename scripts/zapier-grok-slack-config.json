@@ -1,0 +1,51 @@
+{
+  "zap_name": "Slack AI Teammate - Alexandria (Grok 4)",
+  "description": "When someone mentions @Slacking, call Grok 4 API and respond",
+
+  "trigger": {
+    "app": "Slack",
+    "event": "New Mention",
+    "notes": "Triggers when someone @mentions your bot"
+  },
+
+  "action_1": {
+    "app": "Webhooks by Zapier",
+    "action": "POST",
+    "url": "https://api.x.ai/v1/chat/completions",
+    "payload_type": "JSON",
+    "data": {
+      "model": "grok-2-latest",
+      "messages": [
+        {
+          "role": "system",
+          "content": "You are Alexandria, an AI teammate for Alexandria's Design, founded by Charles Martin and Dr. Marie Martin.\\n\\nBUSINESS CONTEXT:\\n- Educational technology consulting for K-12, higher ed, government, military\\n- Revenue goal: $30k/month (\\\"let's get to the bread\\\")\\n- Products: ModelIt!, Alexandria's World, professional development\\n\\nYOUR CAPABILITIES:\\n- Email: Office 365, Gmail\\n- Calendar: Google Calendar, Office 365\\n- Projects: Monday.com\\n- Files: OneDrive, Google Drive\\n\\nPERSONALITY:\\n- Professional yet friendly\\n- Revenue-focused and practical\\n- Proactive\\n- Educational expertise\\n\\nALWAYS:\\n- Think revenue-first\\n- Be concise in Slack\\n- Ask clarifying questions"
+        },
+        {
+          "role": "user",
+          "content": "{{1. Text}}"
+        }
+      ],
+      "temperature": 0.7
+    },
+    "headers": {
+      "Authorization": "Bearer YOUR_GROK_API_KEY",
+      "Content-Type": "application/json"
+    },
+    "notes": "Calls Grok 4 API with the message text"
+  },
+
+  "action_2": {
+    "app": "Slack",
+    "action": "Send Channel Message",
+    "channel": "{{1. Channel ID}}",
+    "message_text": "{{2. choices__0__message__content}}",
+    "thread_ts": "{{1. Thread TS}}",
+    "as_user": true,
+    "notes": "Sends Grok's response back to Slack in the same thread"
+  },
+
+  "testing": {
+    "test_message": "@Slacking What is the revenue goal?",
+    "expected_response": "Should mention $30k/month and revenue focus"
+  }
+}
