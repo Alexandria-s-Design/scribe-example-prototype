@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cell Collective Explorer - Kid-Friendly</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Token Setup Modal -->
+    <div id="tokenModal" class="modal">
+        <div class="modal-content">
+            <h2>🔑 Welcome! Let's Set Up Your Token</h2>
+            <p>To access Cell Collective models, we need your authentication token.</p>
+
+            <div class="token-instructions">
+                <h3>How to Get Your Token:</h3>
+                <ol>
+                    <li>Open Cell Collective in another tab: <a href="https://teach.cellcollective.org" target="_blank">teach.cellcollective.org</a></li>
+                    <li>Login if you haven't already</li>
+                    <li>Press <strong>F12</strong> to open Developer Tools</li>
+                    <li>Go to <strong>Network</strong> tab</li>
+                    <li>Click on any request in the list</li>
+                    <li>Look at <strong>Request Headers</strong></li>
+                    <li>Find the <strong>Cookie</strong> header</li>
+                    <li>Copy ONLY the <code>connect.sid=...</code> part (everything after = until the semicolon or end)</li>
+                    <li>Paste it below:</li>
+                </ol>
+                <p style="color: #999; font-size: 0.85rem; margin-top: 10px;">
+                    Example: <code>s%3ADTipDdobToQEnkGCGklskxOSGL5h_x39.Rm1AMOiyg0in2VxG3XYdEf1P...</code>
+                </p>
+            </div>
+
+            <input type="text" id="tokenInput" placeholder="Paste your token here..." />
+            <button onclick="setToken()">🚀 Let's Explore!</button>
+
+            <div id="tokenError" class="error"></div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="app" class="hidden">
+        <!-- Header -->
+        <header>
+            <div class="container">
+                <h1>🧬 Cell Collective Explorer</h1>
+                <p class="tagline">Discover Amazing Simulations!</p>
+                <div class="user-info" id="userInfo"></div>
+            </div>
+        </header>
+
+        <!-- Stats Bar -->
+        <div class="stats-bar">
+            <div class="container">
+                <div class="stat">
+                    <div class="stat-number" id="modelCount">0</div>
+                    <div class="stat-label">Models Available</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number" id="componentCount">0</div>
+                    <div class="stat-label">Total Components</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number" id="exploreCount">0</div>
+                    <div class="stat-label">Ready to Explore!</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Model Grid -->
+        <main class="container">
+            <div class="section-header">
+                <h2>🌟 Explore Models</h2>
+                <button class="btn-secondary" onclick="refreshModels()">🔄 Refresh</button>
+            </div>
+
+            <div id="loading" class="loading">
+                <div class="spinner"></div>
+                <p>Loading amazing models...</p>
+            </div>
+
+            <div id="modelGrid" class="model-grid"></div>
+
+            <div id="error" class="error"></div>
+        </main>
+    </div>
+
+    <!-- Model Detail Modal -->
+    <div id="detailModal" class="modal hidden">
+        <div class="modal-content large">
+            <span class="close" onclick="closeDetail()">&times;</span>
+            <div id="modelDetail"></div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

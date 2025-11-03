@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cell Collective - Lesson View</title>
+    <link rel="stylesheet" href="lesson.css">
+</head>
+<body>
+    <!-- Token Setup Modal -->
+    <div id="tokenModal" class="modal">
+        <div class="modal-content">
+            <h2>🔑 Set Your Token</h2>
+            <p>To access Cell Collective lessons, we need your authentication token.</p>
+
+            <div class="token-instructions">
+                <h3>How to Get Your Token:</h3>
+                <ol>
+                    <li>Open Cell Collective: <a href="https://teach.cellcollective.org" target="_blank">teach.cellcollective.org</a></li>
+                    <li>Login if you haven't already</li>
+                    <li>Press <strong>F12</strong> to open Developer Tools</li>
+                    <li>Go to <strong>Network</strong> tab</li>
+                    <li>Click on any request</li>
+                    <li>Find the <strong>Cookie</strong> header</li>
+                    <li>Copy ONLY the <code>connect.sid=...</code> part</li>
+                    <li>Paste it below:</li>
+                </ol>
+            </div>
+
+            <input type="text" id="tokenInput" placeholder="Paste your token here..." />
+            <button onclick="setToken()">🚀 Load Lesson</button>
+
+            <div id="tokenError" class="error-message"></div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header style="display: block !important; background: white !important; padding: 20px !important;">
+        <div class="header-content">
+            <h1 style="color: #667eea !important; display: block !important;">🧬 Cell Collective Lesson</h1>
+            <div class="user-info" id="userInfo" style="display: block !important;">Loading...</div>
+            <div id="debugStatus" style="background: yellow; padding: 10px; margin-top: 10px; display: block !important;">
+                Debug: Page loaded, JavaScript starting...
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Lesson Interface -->
+    <div class="lesson-container">
+        <!-- Left Panel: Instructions -->
+        <aside class="left-panel">
+            <div class="panel-header">
+                <h2>📚 Instructions</h2>
+            </div>
+            <div class="panel-content" id="instructionsPanel">
+                <div class="loading-panel">
+                    <div class="spinner"></div>
+                    <p>Loading instructions...</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Center Panel: Graph View -->
+        <main class="center-panel">
+            <div class="panel-header">
+                <h2 id="modelTitle">Model</h2>
+            </div>
+            <div class="graph-container" id="graphContainer">
+                <div class="loading-panel">
+                    <div class="spinner"></div>
+                    <p>Loading model...</p>
+                </div>
+            </div>
+            <div class="simulation-controls">
+                <button id="startButton" class="btn-primary" disabled>▶️ Run Simulation</button>
+                <button id="resetButton" class="btn-secondary" disabled>🔄 Reset</button>
+            </div>
+        </main>
+
+        <!-- Right Panel: Control Panel -->
+        <aside class="right-panel">
+            <div class="panel-header">
+                <h2>⚙️ Controls</h2>
+            </div>
+            <div class="panel-content" id="controlsPanel">
+                <div class="loading-panel">
+                    <div class="spinner"></div>
+                    <p>Loading controls...</p>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <script src="lesson.js"></script>
+</body>
+</html>
