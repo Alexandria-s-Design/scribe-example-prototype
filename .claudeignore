@@ -1,0 +1,120 @@
+# Claude Code Ignore File
+# Excludes files/directories from being scanned to reduce context usage
+
+# Large folders with generated/temporary content
+node_modules/
+.git/
+.git-rewrite/
+.vscode/
+.cursor/
+.windsurf/
+.n8n/
+.lmstudio/
+.ollama/
+.docker/
+.letta/
+.gemini/
+.codex/
+.codeium/
+
+# Backup and history directories (huge context consumers)
+.claude-backup-*/
+Old Files/
+temp/
+outputs/
+
+# Claude Code internal files (already loaded separately)
+.claude/history.jsonl
+.claude/debug/
+.claude/projects/
+.claude/todos/
+.claude/file-history/
+.claude/.credentials.json
+.claude/shell-snapshots/
+.claude/statsig/
+
+# Agent subdirectories (rarely used nested agents)
+# Keep only the main .md agent files, exclude all subdirectories
+.claude/agents/analysis/
+.claude/agents/architecture/
+.claude/agents/consensus/
+.claude/agents/core/
+.claude/agents/data/
+.claude/agents/development/
+.claude/agents/devops/
+.claude/agents/documentation/
+.claude/agents/flow-nexus/
+.claude/agents/github/
+.claude/agents/goal/
+.claude/agents/hive-mind/
+.claude/agents/neural/
+.claude/agents/optimization/
+.claude/agents/reasoning/
+.claude/agents/sparc/
+.claude/agents/specialized/
+.claude/agents/swarm/
+.claude/agents/templates/
+.claude/agents/testing/
+
+# Archived/unused agents
+.claude/agents/glm-is-not-claude-code.md
+.claude/agents/superclaude-framework.md
+.claude/agents/pai-orchestrator.md
+
+# Large data directories
+chroma_db/
+3d-datasets/
+repos/
+
+# Project-specific large folders
+projects/cell-collective-wrapper/
+projects/tpt-automation/ecosystem-artwork/
+Cell-Collective-Build-Codex/
+cellcollective/
+ccapi-original/
+
+# Media and binary files
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+*.mp4
+*.mp3
+*.wav
+*.webm
+*.zip
+*.pdf
+*.docx
+*.pptx
+*.xlsx
+
+# Compiled and cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.dylib
+*.dll
+*.exe
+
+# Package manager files
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# Log files
+*.log
+*.log.*
+
+# Large generated content
+CAAASA VIdeo/ai-generated/
+projects/content-empire/
+
+# Archived/old content
+Alexandria's World Book 2/
+alexandrias-world-*/
+Claude Backup */
+Safe-Spaces-Chatbot/
