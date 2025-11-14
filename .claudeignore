@@ -56,10 +56,18 @@ outputs/
 .claude/agents/templates/
 .claude/agents/testing/
 
-# Archived/unused agents
+# Archived/unused agents (deleted during optimization 2025-11-08)
 .claude/agents/glm-is-not-claude-code.md
 .claude/agents/superclaude-framework.md
 .claude/agents/pai-orchestrator.md
+
+# Large documentation files (moved to docs/ during optimization)
+.claude/documentation/pai-context-loading.md
+
+# Claude Flow & Flow Nexus (deleted during optimization 2025-11-08)
+.claude/agents/flow-nexus/
+.claude/commands/claude-flow.md
+.claude/commands/flow-nexus/
 
 # Large data directories
 chroma_db/

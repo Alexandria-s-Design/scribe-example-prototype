@@ -31,9 +31,9 @@ def main():
     print(f"Started: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
     # Paths
-    input_xlf = r'C:\Users\MarieLexisDad\Downloads\Module-1-do-d-mentor-protege-program (1).xlf'
-    output_xlf = r'C:\Users\MarieLexisDad\Downloads\Module-1-MPP-TRANSFORMED-FORMATTED-FINAL.xlf'
-    report_path = r'C:\Users\MarieLexisDad\Downloads\xlf_formatted_production_results.txt'
+    input_xlf = r'C:\Users\MarieLexisDad\Downloads\Module-2-do-d-mentor-protege-program-roles-responsibilities (1).xlf'
+    output_xlf = r'C:\Users\MarieLexisDad\Downloads\Module-2-MPP-TRANSFORMED-FORMATTED-FINAL.xlf'
+    report_path = r'C:\Users\MarieLexisDad\Downloads\xlf_module2_production_results.txt'
 
     print(f"\nInput XLF:  {input_xlf}")
     print(f"Output XLF: {output_xlf}")
@@ -129,6 +129,11 @@ def main():
         approved = sum(1 for r in batch_results if r['overall_pass'])
         print(f"    ✓ {approved}/{len(batch_results)} approved in this batch")
 
+    # Merge transformation data with verification results
+    for i, result in enumerate(all_results):
+        result['original'] = transformations[i].get('original', '')
+        result['transformed'] = transformations[i].get('transformed', '')
+
     # Calculate final stats
     overall_approved = sum(1 for r in all_results if r['overall_pass'])
     mpp_passed = sum(1 for r in all_results if r['mpp_passed'])
@@ -137,7 +142,7 @@ def main():
     print(f"\n✓ Verification complete!")
     print(f"  - Overall approved: {overall_approved}/{len(all_results)} ({overall_approved/len(all_results)*100:.1f}%)")
     print(f"  - MPP accuracy passed: {mpp_passed}/{len(all_results)} ({mpp_passed/len(all_results)*100:.1f}%)")
-    print(f"  - eLearning SOP passed: {sop_passed}/{len(all_results)*100:.1f}%)")
+    print(f"  - eLearning SOP passed: {sop_passed}/{len(all_results)} ({sop_passed/len(all_results)*100:.1f}%)")
 
     # ==================================================================
     # PHASE 4: WRITE XLF WITH FORMATTING PRESERVATION
@@ -228,9 +233,9 @@ def main():
                 f.write(f"  MPP Pass: {result['mpp_passed']}\n")
                 f.write(f"  SOP Pass: {result['sop_passed']}\n")
                 if not result['mpp_passed']:
-                    f.write(f"  MPP Feedback: {result.get('mpp_accuracy', {}).get('feedback', 'N/A')}\n")
+                    f.write(f"  MPP Feedback: {result.get('mpp_accuracy', {}).get('response', 'N/A')}\n")
                 if not result['sop_passed']:
-                    f.write(f"  SOP Feedback: {result.get('sop_compliance', {}).get('feedback', 'N/A')}\n")
+                    f.write(f"  SOP Feedback: {result.get('elearning_sop', {}).get('response', 'N/A')}\n")
         else:
             f.write("None - all units approved!\n")
 
@@ -246,11 +251,11 @@ def main():
             f.write(f"MPP Check: {'PASS' if result['mpp_passed'] else 'FAIL'}\n")
             f.write(f"SOP Check: {'PASS' if result['sop_passed'] else 'FAIL'}\n\n")
 
-            f.write(f"Original Text:\n{result.get('original_text', 'N/A')}\n\n")
-            f.write(f"Transformed Text:\n{result.get('transformed_text', 'N/A')}\n\n")
+            f.write(f"Original Text:\n{result.get('original', 'N/A')}\n\n")
+            f.write(f"Transformed Text:\n{result.get('transformed', 'N/A')}\n\n")
 
-            mpp_feedback = result.get('mpp_accuracy', {}).get('feedback', 'N/A')
-            sop_feedback = result.get('sop_compliance', {}).get('feedback', 'N/A')
+            mpp_feedback = result.get('mpp_accuracy', {}).get('response', 'N/A')
+            sop_feedback = result.get('elearning_sop', {}).get('response', 'N/A')
 
             f.write(f"Grok MPP Feedback:\n{mpp_feedback}\n\n")
             f.write(f"Grok SOP Feedback:\n{sop_feedback}\n\n")

@@ -16,7 +16,7 @@ from dotenv import load_dotenv
 from openai import OpenAI
 
 # Add MPP backend to path for RAG access
-sys.path.insert(0, str(Path(__file__).parent.parent / "MPP-SOP-Appendix-I-Chat-2" / "backend"))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "MPP-SOP-Appendix-I-Chat-2" / "backend"))
 from services.rag_service import RAGService
 
 load_dotenv()
@@ -44,7 +44,7 @@ class GrokDualCheckVerifier:
 
         # Change to MPP directory for ChromaDB access
         original_dir = os.getcwd()
-        mpp_dir = Path(__file__).parent.parent / "MPP-SOP-Appendix-I-Chat-2"
+        mpp_dir = Path(__file__).parent.parent.parent / "MPP-SOP-Appendix-I-Chat-2"
         os.chdir(mpp_dir)
 
         self.rag_service = RAGService()
