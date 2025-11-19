@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scribe Onboarding Simulation</title>
+
+    <!-- Inter Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* ===== CSS RESET & BASE STYLES ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Colors */
+            --primary-blue: #4F46E5;
+            --primary-purple: #7C3AED;
+            --google-blue: #4285F4;
+            --google-blue-hover: #357ABD;
+            --success-green: #10B981;
+            --error-red: #EF4444;
+            --warning-orange: #F59E0B;
+
+            /* Text Colors */
+            --text-primary: #111827;
+            --text-secondary: #374151;
+            --text-tertiary: #6B7280;
+            --text-quaternary: #9CA3AF;
+            --text-white: #FFFFFF;
+
+            /* Backgrounds */
+            --bg-white: #FFFFFF;
+            --bg-gray-50: #F9FAFB;
+            --bg-gray-100: #F3F4F6;
+            --bg-gray-200: #E5E7EB;
+
+            /* Borders */
+            --border-gray: #E5E7EB;
+            --border-gray-dark: #D1D5DB;
+
+            /* Shadows */
+            --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 24px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+            --shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.12);
+
+            /* Transitions */
+            --transition-fast: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-normal: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-screen: 600ms cubic-bezier(0.4, 0, 0.2, 1);
+
+            /* Z-Index Scale */
+            --z-base: 1;
+            --z-dropdown: 1000;
+            --z-modal-backdrop: 1300;
+            --z-modal: 1400;
+            --z-guidance: 1500;
+            --z-toast: 1600;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-gray-50);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            line-height: 1.5;
+        }
+
+        /* ===== SCREEN CONTAINER ===== */
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            min-height: 100vh;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity var(--transition-screen), visibility var(--transition-screen);
+        }
+
+        .screen.active {
+            opacity: 1;
+            visibility: visible;
+            position: relative;
+        }
+
+        /* ===== COVER SCREEN ===== */
+        .cover-screen {
+            background: linear-gradient(135deg, #F8F9FF 0%, #FFFFFF 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .cover-card {
+            background: var(--bg-white);
+            border-radius: 20px;
+            padding: 60px 48px;
+            max-width: 700px;
+            box-shadow: var(--shadow-xl);
+            text-align: center;
+        }
+
+        .cover-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-purple) 100%);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 32px;
+        }
+
+        .cover-icon svg {
+            width: 80px;
+            height: auto;
+        }
+
+        .cover-heading {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .cover-description {
+            font-size: 18px;
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+            line-height: 1.6;
+        }
+
+        .cover-objectives {
+            text-align: left;
+            margin: 32px 0;
+            padding: 24px;
+            background: var(--bg-gray-50);
+            border-radius: 12px;
+        }
+
+        .cover-objectives h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+        }
+
+        .cover-objectives ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .cover-objectives li {
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            padding-left: 28px;
+            position: relative;
+        }
+
+        .cover-objectives li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--success-green);
+            font-weight: 700;
+        }
+
+        .btn-primary {
+            background: var(--primary-blue);
+            color: var(--text-white);
+            border: none;
+            padding: 16px 48px;
+            font-size: 18px;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            font-family: inherit;
+        }
+
+        .btn-primary:hover {
+            background: #4338CA;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(79, 70, 229, 0.3);
+        }
+
+        /* ===== HOMEPAGE SCREEN ===== */
+        .homepage-screen {
+            background: linear-gradient(180deg, var(--primary-blue) 0%, var(--primary-purple) 100%);
+        }
+
+        .homepage-hero {
+            padding: 80px 40px;
+            text-align: center;
+            color: var(--text-white);
+        }
+
+        .homepage-hero h1 {
+            font-size: 56px;
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 16px;
+        }
+
+        .homepage-hero p {
+            font-size: 20px;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .use-cases-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 40px 80px;
+        }
+
+        .use-cases-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        .use-case-card {
+            background: var(--bg-white);
+            border-radius: 16px;
+            padding: 32px;
+            min-height: 240px;
+            box-shadow: var(--shadow-md);
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            border: 2px solid transparent;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .use-case-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary-blue);
+        }
+
+        .use-case-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-purple) 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .use-case-icon svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .use-case-card h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .use-case-card p {
+            font-size: 14px;
+            color: var(--text-tertiary);
+            line-height: 1.5;
+        }
+
+        /* ===== SIGN IN SCREEN ===== */
+        .signin-screen {
+            background: var(--bg-white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .signin-card {
+            background: var(--bg-white);
+            border-radius: 20px;
+            padding: 48px;
+            max-width: 480px;
+            width: 100%;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+        }
+
+        .signin-card h2 {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .signin-subtitle {
+            font-size: 14px;
+            color: var(--text-tertiary);
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .google-button {
+            width: 100%;
+            height: 48px;
+            background: var(--google-blue);
+            color: var(--text-white);
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            font-family: inherit;
+        }
+
+        .google-button:hover {
+            background: var(--google-blue-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(66, 133, 244, 0.3);
+        }
+
+        .google-icon {
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 24px 0;
+            gap: 16px;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: var(--border-gray);
+        }
+
+        .divider-text {
+            font-size: 14px;
+            color: var(--text-quaternary);
+        }
+
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        .input-field {
+            width: 100%;
+            height: 48px;
+            padding: 12px 16px;
+            border: 2px solid var(--border-gray);
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: inherit;
+            transition: all var(--transition-normal);
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        /* ===== MODAL SCREENS ===== */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: var(--z-modal-backdrop);
+        }
+
+        .modal-card {
+            background: var(--bg-white);
+            border-radius: 12px;
+            padding: 32px;
+            max-width: 480px;
+            width: 90%;
+            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.2);
+            z-index: var(--z-modal);
+        }
+
+        .modal-heading {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+        }
+
+        .account-option {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            border: 2px solid var(--border-gray);
+            border-radius: 8px;
+            margin: 12px 0;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            background: var(--bg-white);
+        }
+
+        .account-option:hover {
+            background: var(--bg-gray-50);
+            border-color: var(--primary-blue);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667EEA 0%, #764BA2 100%);
+            color: var(--text-white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .account-info {
+            flex: 1;
+        }
+
+        .account-name {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .account-email {
+            font-size: 14px;
+            color: var(--text-tertiary);
+        }
+
+        /* ===== OAUTH PERMISSIONS SCREEN ===== */
+        .oauth-screen .modal-card {
+            max-width: 520px;
+        }
+
+        .oauth-heading {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 24px;
+        }
+
+        .permission-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-gray);
+        }
+
+        .permission-item:last-child {
+            border-bottom: none;
+        }
+
+        .permission-icon {
+            width: 24px;
+            height: 24px;
+            color: var(--success-green);
+            flex-shrink: 0;
+        }
+
+        .permission-text {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .button-container {
+            display: flex;
+            gap: 16px;
+            margin-top: 24px;
+            justify-content: flex-end;
+        }
+
+        .btn-cancel {
+            background: transparent;
+            color: #1A73E8;
+            border: 1px solid #DADCE0;
+            padding: 8px 24px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            font-family: inherit;
+        }
+
+        .btn-allow {
+            background: #1A73E8;
+            color: var(--text-white);
+            border: none;
+            padding: 8px 24px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            font-family: inherit;
+        }
+
+        .btn-allow:hover {
+            background: #1557B0;
+        }
+
+        /* ===== TEAM NAMING SCREEN ===== */
+        .team-naming-screen .modal-card {
+            max-width: 520px;
+            padding: 48px;
+        }
+
+        .team-icon {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, #667EEA 0%, #764BA2 100%);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+        }
+
+        .team-icon svg {
+            width: 32px;
+            height: 32px;
+        }
+
+        .team-heading {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        .team-subtitle {
+            font-size: 16px;
+            color: var(--text-tertiary);
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .input-label {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .team-input {
+            width: 100%;
+            height: 56px;
+            padding: 16px 20px;
+            border: 2px solid var(--border-gray);
+            border-radius: 12px;
+            font-size: 18px;
+            font-family: inherit;
+            transition: all var(--transition-normal);
+        }
+
+        .team-input:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+        }
+
+        .team-input.error {
+            border-color: var(--error-red);
+        }
+
+        .team-input.success {
+            border-color: var(--success-green);
+        }
+
+        .validation-message {
+            font-size: 14px;
+            margin-top: 8px;
+            display: none;
+        }
+
+        .validation-message.error {
+            color: var(--error-red);
+            display: block;
+        }
+
+        .validation-message.success {
+            color: var(--success-green);
+            display: block;
+        }
+
+        .btn-submit {
+            width: 100%;
+            height: 56px;
+            background: linear-gradient(135deg, #667EEA 0%, #764BA2 100%);
+            color: var(--text-white);
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            margin-top: 24px;
+            font-family: inherit;
+        }
+
+        .btn-submit:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .skip-link {
+            display: block;
+            text-align: center;
+            font-size: 14px;
+            color: var(--text-tertiary);
+            margin-top: 16px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* ===== COMPLETION SCREEN ===== */
+        .completion-screen {
+            background: linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .completion-card {
+            background: var(--bg-white);
+            border-radius: 20px;
+            padding: 60px 48px;
+            max-width: 600px;
+            box-shadow: var(--shadow-xl);
+            text-align: center;
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--success-green);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 32px;
+            font-size: 48px;
+            color: var(--text-white);
+        }
+
+        .completion-heading {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+        }
+
+        .completion-message {
+            font-size: 18px;
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+        }
+
+        .btn-secondary {
+            background: var(--bg-gray-200);
+            color: var(--text-secondary);
+            border: none;
+            padding: 14px 32px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            font-family: inherit;
+        }
+
+        .btn-secondary:hover {
+            background: var(--border-gray-dark);
+        }
+
+        /* ===== GUIDANCE SYSTEM ===== */
+        .guidance-arrow {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            color: var(--primary-blue);
+            animation: bounce 1.5s ease-in-out infinite;
+            z-index: var(--z-guidance);
+            display: none;
+        }
+
+        .guidance-arrow.active {
+            display: block;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .tooltip {
+            position: absolute;
+            background: #1F2937;
+            color: var(--text-white);
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            max-width: 280px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            z-index: var(--z-guidance);
+            display: none;
+        }
+
+        .tooltip.active {
+            display: block;
+        }
+
+        .tooltip::after {
+            content: "";
+            position: absolute;
+            border: 8px solid transparent;
+        }
+
+        .tooltip.bottom::after {
+            top: -16px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-bottom-color: #1F2937;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 1023px) {
+            .use-cases-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 639px) {
+            .use-cases-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .homepage-hero h1 {
+                font-size: 32px;
+            }
+
+            .cover-card,
+            .signin-card,
+            .modal-card {
+                padding: 24px;
+            }
+
+            .guidance-arrow,
+            .tooltip {
+                display: none !important;
+            }
+        }
+
+        /* ===== UTILITY CLASSES ===== */
+        .hidden {
+            display: none !important;
+        }
+
+        .fade-in {
+            animation: fadeIn var(--transition-slow) ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <!-- SCREEN 0: COVER PAGE -->
+    <div class="screen active cover-screen" id="screen-cover">
+        <div class="cover-card fade-in">
+            <div class="cover-icon">
+                <svg width="93" height="32" viewBox="0 0 93 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <mask id="mask0_1599_1808" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="0" y="0" width="93" height="32">
+                        <path d="M93 0H0V32H93V0Z" fill="white"/>
+                    </mask>
+                    <g mask="url(#mask0_1599_1808)">
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M77.3523 1.67214C77.2235 1.70113 77.132 1.81496 77.132 1.94631V4.61834C77.132 4.79861 77.3003 4.93229 77.4772 4.8925L84.88 3.22741C85.0089 3.19842 85.1004 3.08459 85.1004 2.95324V0.281213C85.1004 0.100938 84.9321 -0.0327376 84.7552 0.00704875L77.3523 1.67214ZM77.132 6.61579C77.132 6.48444 77.2235 6.37061 77.3523 6.34162L92.7236 2.88423C92.9005 2.84444 93.0688 2.97811 93.0688 3.15839V5.83042C93.0688 5.96176 92.9773 6.0756 92.8485 6.10459L77.4772 9.56198C77.3003 9.60177 77.132 9.46809 77.132 9.28782V6.61579ZM85.1005 9.49321C85.1005 9.36187 85.192 9.24803 85.3208 9.21905L92.7237 7.55395C92.9006 7.51417 93.0689 7.64784 93.0689 7.82812V10.5001C93.0689 10.6315 92.9774 10.7453 92.8485 10.7743L85.4457 12.4394C85.2688 12.4792 85.1005 12.3455 85.1005 12.1652V9.49321Z" fill="white"/>
+                        <path d="M8.17578 22.6181C8.17578 22.7087 8.21953 22.794 8.29445 22.8456C9.78158 23.8703 11.6743 24.5324 14.019 24.5324C18.1569 24.5324 20.3136 22.2888 20.3136 19.5966C20.3136 16.8046 18.6835 15.4335 15.5488 14.0625C13.5927 13.19 11.787 12.5917 11.787 11.1957C11.787 10.1487 12.7902 9.40091 14.5958 9.40091C16.1052 9.40091 17.2623 9.80637 18.2745 10.538C18.4704 10.6797 18.7588 10.5468 18.7588 10.3059V7.90432C18.7588 7.81131 18.7127 7.72395 18.6342 7.6734C17.4798 6.93052 16.0936 6.55908 14.5206 6.55908C11.1601 6.55908 8.65227 8.32899 8.65227 11.1957C8.65227 13.9129 10.6836 15.2341 13.2917 16.331C16.0252 17.4777 17.2039 18.051 17.2039 19.5966C17.2039 20.6934 16.0754 21.7404 13.8434 21.7404C11.7103 21.7404 10.0103 20.9967 8.67367 19.8735C8.48221 19.7127 8.17578 19.8429 8.17578 20.0921V22.6181Z" fill="white"/>
+                        <path d="M21.9825 17.9264C21.9825 21.7653 24.9668 24.5822 28.879 24.5822C30.3823 24.5822 31.7918 24.1861 32.8356 23.3938C32.9034 23.3423 32.9416 23.2616 32.9416 23.1768V20.9877C32.9416 20.7388 32.6335 20.6065 32.4356 20.7592C31.4059 21.5539 30.2578 21.8651 29.0545 21.8651C26.6972 21.8651 24.9668 20.1949 24.9668 17.9264C24.9668 15.6579 26.6972 13.9877 29.0545 13.9877C30.2594 13.9877 31.409 14.318 32.4398 15.1046C32.6372 15.2552 32.9416 15.1228 32.9416 14.8754V12.6785C32.9416 12.5922 32.9021 12.5104 32.8324 12.4589C31.789 11.6891 30.3808 11.2705 28.879 11.2705C24.9668 11.2705 21.9825 14.0874 21.9825 17.9264Z" fill="white"/>
+                        <path d="M35.1709 23.952C35.1709 24.1072 35.2975 24.233 35.4537 24.233H37.8724C38.0286 24.233 38.1552 24.1072 38.1552 23.952V17.627C38.1552 15.558 39.4844 14.2617 41.5659 14.2617C41.8959 14.2617 42.2019 14.2856 42.4755 14.3252C42.6537 14.351 42.8198 14.2176 42.8198 14.0386V11.7251C42.8198 11.5911 42.7242 11.4778 42.5903 11.4628C42.3961 11.4411 42.1298 11.4199 41.917 11.4199C40.1113 11.4199 38.7571 12.2425 38.1552 13.5388V11.9503C38.1552 11.795 38.0286 11.6692 37.8724 11.6692H35.4537C35.2975 11.6692 35.1709 11.795 35.1709 11.9503V23.952Z" fill="white"/>
+                        <path d="M46.4472 10.1985C47.4002 10.1985 48.2277 9.42573 48.2277 8.4286C48.2277 7.43146 47.4002 6.65869 46.4472 6.65869C45.4691 6.65869 44.6416 7.43146 44.6416 8.4286C44.6416 9.42573 45.4691 10.1985 46.4472 10.1985ZM44.9425 23.9521C44.9425 24.1073 45.0691 24.2331 45.2253 24.2331H47.6691C47.8253 24.2331 47.9519 24.1073 47.9519 23.9521V11.9504C47.9519 11.7951 47.8253 11.6693 47.6691 11.6693H45.2253C45.0691 11.6693 44.9425 11.7951 44.9425 11.9504V23.9521Z" fill="white"/>
+                        <path d="M50.6006 23.9522C50.6006 24.1074 50.7272 24.2332 50.8834 24.2332H53.3272C53.4833 24.2332 53.61 24.1074 53.61 23.9522V22.4135C54.0363 23.5851 55.5159 24.5075 57.6475 24.5075C61.2086 24.5075 63.9672 21.6656 63.9672 17.9513C63.9672 14.237 61.2086 11.3951 57.6475 11.3951C55.5159 11.3951 54.0363 12.3175 53.61 13.4891V7.3569C53.61 7.17662 53.4416 7.04295 53.2648 7.08273L50.8209 7.63241C50.6921 7.6614 50.6006 7.77523 50.6006 7.90658V23.9522ZM53.3843 17.9513C53.3843 15.7576 55.0645 14.1123 57.2463 14.1123C59.3779 14.1123 60.9829 15.7576 60.9829 17.9513C60.9829 20.145 59.3779 21.7903 57.2463 21.7903C55.0645 21.7903 53.3843 20.145 53.3843 17.9513Z" fill="white"/>
+                        <path d="M65.502 18.0758C65.502 22.0395 68.2104 24.6071 72.1728 24.6071C74.3043 24.6071 75.5703 24.1885 76.7163 23.4186C76.7926 23.3674 76.8372 23.2812 76.8372 23.1896V21.1871C76.8372 20.9419 76.5342 20.804 76.3297 20.9411C75.5438 21.4682 74.2547 21.9896 72.2982 21.9896C70.0411 21.9896 68.5866 20.7182 68.4863 18.724H77.9105C78.0558 18.724 78.1777 18.6145 78.1876 18.4705C78.2166 18.0496 78.2166 17.6521 78.2166 17.6521C78.2166 14.1621 75.759 11.3701 72.0474 11.3701C68.2857 11.3701 65.502 13.9377 65.502 17.9512V18.0758ZM68.5615 16.6051C68.6618 15.1094 70.1916 13.9128 72.0474 13.9128C73.7778 13.9128 75.1571 15.1343 75.1571 16.6051H68.5615Z" fill="white"/>
+                    </g>
+                </svg>
+            </div>
+            <h1 class="cover-heading">Welcome to Scribe Onboarding</h1>
+            <p class="cover-description">
+                This interactive simulation will guide you through the process of creating your Scribe account.
+                You'll experience the actual onboarding flow with helpful guidance along the way.
+            </p>
+            <div class="cover-objectives">
+                <h3>What You'll Learn:</h3>
+                <ul>
+                    <li>How to navigate the Scribe homepage and choose your use case</li>
+                    <li>How to sign in using your Google account</li>
+                    <li>How to grant necessary permissions for Scribe</li>
+                    <li>How to set up your team workspace</li>
+                </ul>
+            </div>
+            <button class="btn-primary" onclick="nextScreen()">Start Simulation</button>
+        </div>
+    </div>
+
+    <!-- SCREEN 1: HOMEPAGE -->
+    <div class="screen homepage-screen" id="screen-homepage">
+        <div class="homepage-hero">
+            <h1>Brilliantly efficient</h1>
+            <p>Create step-by-step guides with AI and screenshots</p>
+        </div>
+
+        <div class="use-cases-container">
+            <div class="use-cases-grid">
+                <div class="use-case-card" onclick="selectUseCase('onboard')">
+                    <div class="use-case-icon">
+                        <svg width="11" height="13" viewBox="0 0 11 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M5.63696 6.5C4.55884 6.5 3.57446 5.9375 3.0354 5C2.49634 4.08594 2.49634 2.9375 3.0354 2C3.57446 1.08594 4.55884 0.5 5.63696 0.5C6.69165 0.5 7.67603 1.08594 8.21509 2C8.75415 2.9375 8.75415 4.08594 8.21509 5C7.67603 5.9375 6.69165 6.5 5.63696 6.5ZM4.55884 7.625H6.69165C9.01196 7.625 10.887 9.5 10.887 11.8203C10.887 12.1953 10.5588 12.5 10.1838 12.5H1.06665C0.69165 12.5 0.386963 12.1953 0.386963 11.8203C0.386963 9.5 2.23853 7.625 4.55884 7.625Z" fill="white"/>
+                        </svg>
+                    </div>
+                    <h3>Onboard new hires</h3>
+                    <p>Create comprehensive onboarding guides that help new team members get up to speed quickly.</p>
+                </div>
+
+                <div class="use-case-card" onclick="selectUseCase('sop')">
+                    <div class="use-case-icon">
+                        <svg width="9" height="11" viewBox="0 0 9 11" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M0.886963 0.8125C0.886963 0.507812 1.12134 0.25 1.42603 0.25C1.54321 0.25 1.68384 0.320312 1.77759 0.390625L8.19946 6.10938C8.31665 6.20312 8.38696 6.34375 8.38696 6.48438C8.38696 6.78906 8.15259 7 7.8479 7H5.08228L6.41821 9.67188C6.60571 10.0469 6.46509 10.4922 6.09009 10.6797C5.71509 10.8672 5.26978 10.7266 5.08228 10.3516L3.7229 7.60938L1.77759 9.83594C1.68384 9.95312 1.54321 10 1.40259 10C1.0979 10 0.886963 9.78906 0.886963 9.48438V0.8125Z" fill="white"/>
+                        </svg>
+                    </div>
+                    <h3>Create SOPs</h3>
+                    <p>Document standard operating procedures with visual step-by-step instructions.</p>
+                </div>
+
+                <div class="use-case-card" onclick="selectUseCase('training')">
+                    <div class="use-case-icon">
+                        <svg width="15" height="11" viewBox="0 0 15 11" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M6.7229 10.5625C6.11353 10.3281 5.0354 10 4.26196 10C3.3479 10 2.17603 10.3047 1.44946 10.5391C1.16821 10.6328 0.886963 10.4219 0.886963 10.1641V1.46875C0.886963 1.1875 1.02759 0.929688 1.30884 0.835938C1.96509 0.578125 3.06665 0.25 4.26196 0.25C5.62134 0.25 6.67603 0.71875 7.14478 1.09375C7.21509 1.16406 7.26196 1.25781 7.26196 1.35156V10.1875C7.26196 10.4688 6.98071 10.6562 6.7229 10.5625ZM8.52759 10.5625C8.26978 10.6562 8.01196 10.4688 8.01196 10.1875V1.35156C8.01196 1.25781 8.0354 1.16406 8.12915 1.09375C8.57446 0.71875 9.62915 0.25 11.012 0.25C12.1838 0.25 13.2854 0.578125 13.9417 0.835938C14.2229 0.929688 14.387 1.1875 14.387 1.46875V10.1641C14.387 10.4219 14.0823 10.6328 13.801 10.5391C13.0745 10.3047 11.9026 10 11.012 10C10.2151 10 9.1604 10.3281 8.52759 10.5625Z" fill="white"/>
+                        </svg>
+                    </div>
+                    <h3>Build training docs</h3>
+                    <p>Develop engaging training materials with screenshots and detailed explanations.</p>
+                </div>
+
+                <div class="use-case-card" onclick="selectUseCase('questions')">
+                    <div class="use-case-icon">
+                        <svg width="13" height="11" viewBox="0 0 13 11" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M6.63696 10V10.0234C5.74634 10.0234 4.92603 9.85938 4.17603 9.60156C3.91821 9.78906 3.44946 10.0703 2.9104 10.3047C2.3479 10.5625 1.66821 10.7734 1.01196 10.7734C0.8479 10.7734 0.707275 10.6797 0.6604 10.5391C0.590088 10.3984 0.636963 10.2344 0.730713 10.1172C0.75415 10.1172 0.75415 10.0938 0.777588 10.0938C0.801025 10.0469 0.8479 10 0.894775 9.95312C0.988525 9.83594 1.10571 9.64844 1.24634 9.4375C1.48071 9.0625 1.69165 8.54688 1.73853 7.96094C1.0354 7.16406 0.636963 6.20312 0.636963 5.125C0.636963 2.45312 3.30884 0.25 6.63696 0.25C9.94165 0.25 12.637 2.45312 12.637 5.125C12.637 7.82031 9.94165 10 6.63696 10ZM3.63696 4.375C3.21509 4.375 2.88696 4.72656 2.88696 5.125C2.88696 5.54688 3.21509 5.875 3.63696 5.875C4.0354 5.875 4.38696 5.54688 4.38696 5.125C4.38696 4.72656 4.0354 4.375 3.63696 4.375ZM6.63696 4.375C6.21509 4.375 5.88696 4.72656 5.88696 5.125C5.88696 5.54688 6.21509 5.875 6.63696 5.875C7.0354 5.875 7.38696 5.54688 7.38696 5.125C7.38696 4.72656 7.0354 4.375 6.63696 4.375ZM8.88696 5.125C8.88696 5.54688 9.21509 5.875 9.63696 5.875C10.0354 5.875 10.387 5.54688 10.387 5.125C10.387 4.72656 10.0354 4.375 9.63696 4.375C9.21509 4.375 8.88696 4.72656 8.88696 5.125Z" fill="white"/>
+                        </svg>
+                    </div>
+                    <h3>Answer questions</h3>
+                    <p>Create quick guides to answer frequently asked questions from your team.</p>
+                </div>
+
+                <div class="use-case-card" onclick="selectUseCase('customers')">
+                    <div class="use-case-icon">
+                        <svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M6.63696 1.625C3.94165 1.625 1.76196 3.82812 1.76196 6.5V7.4375C1.76196 7.76562 1.50415 8 1.19946 8C0.871338 8 0.636963 7.76562 0.636963 7.4375V6.5C0.636963 3.19531 3.30884 0.5 6.63696 0.5C9.94165 0.5 12.637 3.19531 12.637 6.5V9.89844C12.637 11.0234 11.6995 11.9609 10.551 11.9609L7.9729 11.9375C7.7854 12.2891 7.4104 12.5 7.01196 12.5H6.26196C5.62915 12.5 5.13696 12.0078 5.13696 11.375C5.13696 10.7656 5.62915 10.25 6.26196 10.25H7.01196C7.4104 10.25 7.7854 10.4844 7.9729 10.8125L10.5745 10.8359C11.0901 10.8359 11.512 10.4141 11.512 9.89844V6.5C11.512 3.82812 9.30884 1.625 6.63696 1.625ZM4.01196 5.375H4.38696C4.7854 5.375 5.13696 5.72656 5.13696 6.125V8.75C5.13696 9.17188 4.7854 9.5 4.38696 9.5H4.01196C3.16821 9.5 2.51196 8.84375 2.51196 8V6.875C2.51196 6.05469 3.16821 5.375 4.01196 5.375ZM9.26196 5.375C10.0823 5.375 10.762 6.05469 10.762 6.875V8C10.762 8.84375 10.0823 9.5 9.26196 9.5H8.88696C8.46509 9.5 8.13696 9.17188 8.13696 8.75V6.125C8.13696 5.72656 8.46509 5.375 8.88696 5.375H9.26196Z" fill="white"/>
+                        </svg>
+                    </div>
+                    <h3>Assist customers</h3>
+                    <p>Build helpful resources to support your customers and reduce support tickets.</p>
+                </div>
+
+                <div class="use-case-card" onclick="selectUseCase('other')">
+                    <div class="use-case-icon">
+                        <svg width="10" height="13" viewBox="0 0 10 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M0.136963 5V4.25C0.136963 2.1875 1.80103 0.5 3.88696 0.5H4.26196V5H0.136963ZM0.136963 5.75H4.63696H9.13696V8.75C9.13696 10.8359 7.44946 12.5 5.38696 12.5H3.88696C1.80103 12.5 0.136963 10.8359 0.136963 8.75V5.75ZM9.13696 5H5.01196V0.5H5.38696C7.44946 0.5 9.13696 2.1875 9.13696 4.25V5Z" fill="white"/>
+                        </svg>
+                    </div>
+                    <h3>Something else</h3>
+                    <p>Explore other ways to use Scribe for your specific documentation needs.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Guidance Arrow -->
+        <div class="guidance-arrow active" style="bottom: 200px; left: 50%; transform: translateX(-50%);">
+            ⬆️
+        </div>
+        <div class="tooltip active bottom" style="bottom: 160px; left: 50%; transform: translateX(-50%);">
+            Click any card to continue
+        </div>
+    </div>
+
+    <!-- SCREEN 2: SIGN IN -->
+    <div class="screen signin-screen" id="screen-signin">
+        <div class="signin-card">
+            <h2>Sign in to Scribe</h2>
+            <p class="signin-subtitle">Get started with your account</p>
+
+            <button class="google-button" onclick="showAccountChooser()">
+                <div class="google-icon">G</div>
+                <span>Sign in with Google</span>
+            </button>
+
+            <div class="divider">
+                <span class="divider-text">or</span>
+            </div>
+
+            <form onsubmit="event.preventDefault(); showAccountChooser();">
+                <div class="input-group">
+                    <input type="email" class="input-field" placeholder="Email address" required>
+                </div>
+                <div class="input-group">
+                    <input type="password" class="input-field" placeholder="Password" required>
+                </div>
+                <button type="submit" class="btn-primary" style="width: 100%;">Continue</button>
+            </form>
+        </div>
+
+        <!-- Guidance -->
+        <div class="guidance-arrow" style="top: 50%; right: 20%; transform: translateY(-50%) rotate(-90deg);" id="signin-arrow">
+            ⬆️
+        </div>
+        <div class="tooltip bottom" style="top: 45%; right: 15%;" id="signin-tooltip">
+            Click "Sign in with Google" to continue
+        </div>
+    </div>
+
+    <!-- SCREEN 3: GOOGLE ACCOUNT CHOOSER -->
+    <div class="screen" id="screen-account-chooser">
+        <div class="modal-backdrop">
+            <div class="modal-card">
+                <h2 class="modal-heading">Choose an account</h2>
+                <p style="font-size: 14px; color: var(--text-tertiary); margin-bottom: 20px;">
+                    to continue to Scribe
+                </p>
+
+                <div class="account-option" onclick="showOAuthPermissions()">
+                    <div class="avatar">A</div>
+                    <div class="account-info">
+                        <div class="account-name">Alexandria's World</div>
+                        <div class="account-email">alexandriasworld1234@gmail.com</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCREEN 4: OAUTH PERMISSIONS -->
+    <div class="screen oauth-screen" id="screen-oauth">
+        <div class="modal-backdrop">
+            <div class="modal-card">
+                <h2 class="oauth-heading">Scribe wants to access your Google Account</h2>
+                <p style="font-size: 14px; color: var(--text-tertiary); margin-bottom: 24px;">
+                    This will allow <strong>Scribe</strong> to:
+                </p>
+
+                <div class="permission-item">
+                    <div class="permission-icon">✓</div>
+                    <div class="permission-text">See your personal info, including email and name</div>
+                </div>
+
+                <div class="permission-item">
+                    <div class="permission-icon">✓</div>
+                    <div class="permission-text">See your primary Google Account email address</div>
+                </div>
+
+                <div class="permission-item">
+                    <div class="permission-icon">✓</div>
+                    <div class="permission-text">Associate you with your personal info on Google</div>
+                </div>
+
+                <div class="button-container">
+                    <button class="btn-cancel" onclick="goBack()">Cancel</button>
+                    <button class="btn-allow" onclick="showTeamNaming()">Allow</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCREEN 5: TEAM NAMING -->
+    <div class="screen team-naming-screen" id="screen-team-naming">
+        <div class="modal-backdrop">
+            <div class="modal-card">
+                <div class="team-icon">
+                    <svg width="11" height="13" viewBox="0 0 11 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M5.63696 6.5C4.55884 6.5 3.57446 5.9375 3.0354 5C2.49634 4.08594 2.49634 2.9375 3.0354 2C3.57446 1.08594 4.55884 0.5 5.63696 0.5C6.69165 0.5 7.67603 1.08594 8.21509 2C8.75415 2.9375 8.75415 4.08594 8.21509 5C7.67603 5.9375 6.69165 6.5 5.63696 6.5ZM4.55884 7.625H6.69165C9.01196 7.625 10.887 9.5 10.887 11.8203C10.887 12.1953 10.5588 12.5 10.1838 12.5H1.06665C0.69165 12.5 0.386963 12.1953 0.386963 11.8203C0.386963 9.5 2.23853 7.625 4.55884 7.625Z" fill="white"/>
+                    </svg>
+                </div>
+                <h2 class="team-heading">Name your team</h2>
+                <p class="team-subtitle">This will be the workspace name for your team</p>
+
+                <form onsubmit="event.preventDefault(); submitTeamName();">
+                    <label class="input-label">Team Name</label>
+                    <input
+                        type="text"
+                        class="team-input"
+                        id="team-name-input"
+                        placeholder="Enter your team name"
+                        minlength="2"
+                        maxlength="50"
+                        required
+                        oninput="validateTeamName()"
+                    >
+                    <div class="validation-message" id="validation-message"></div>
+
+                    <button type="submit" class="btn-submit" id="submit-button" disabled>
+                        Create Team
+                    </button>
+                </form>
+
+                <a class="skip-link" onclick="completeSimulation()">Skip for now</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCREEN 6: COMPLETION -->
+    <div class="screen completion-screen" id="screen-completion">
+        <div class="completion-card">
+            <div class="success-icon">✓</div>
+            <h1 class="completion-heading">🎉 Congratulations!</h1>
+            <p class="completion-message">
+                You've successfully completed the Scribe onboarding simulation.
+                You now understand how to create your account and set up your workspace.
+            </p>
+            <div class="button-group">
+                <button class="btn-secondary" onclick="restartSimulation()">Restart Simulation</button>
+                <button class="btn-primary" onclick="closeSimulation()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== STATE MANAGEMENT =====
+        let currentScreen = 0;
+        let selectedUseCase = '';
+        let teamName = '';
+
+        const screens = [
+            'screen-cover',
+            'screen-homepage',
+            'screen-signin',
+            'screen-account-chooser',
+            'screen-oauth',
+            'screen-team-naming',
+            'screen-completion'
+        ];
+
+        // ===== NAVIGATION FUNCTIONS =====
+        function nextScreen() {
+            if (currentScreen < screens.length - 1) {
+                transitionToScreen(currentScreen + 1);
+            }
+        }
+
+        function prevScreen() {
+            if (currentScreen > 0) {
+                transitionToScreen(currentScreen - 1);
+            }
+        }
+
+        function transitionToScreen(index) {
+            // Hide current screen
+            const current = document.getElementById(screens[currentScreen]);
+            current.classList.remove('active');
+
+            // Show new screen
+            setTimeout(() => {
+                currentScreen = index;
+                const next = document.getElementById(screens[currentScreen]);
+                next.classList.add('active');
+
+                // Show/hide guidance based on screen
+                updateGuidance();
+            }, 300);
+        }
+
+        function goBack() {
+            prevScreen();
+        }
+
+        // ===== SCREEN-SPECIFIC FUNCTIONS =====
+        function selectUseCase(useCase) {
+            selectedUseCase = useCase;
+            console.log('Selected use case:', useCase);
+            nextScreen(); // Go to sign in screen
+        }
+
+        function showAccountChooser() {
+            transitionToScreen(3); // Go to account chooser
+        }
+
+        function showOAuthPermissions() {
+            transitionToScreen(4); // Go to OAuth permissions
+        }
+
+        function showTeamNaming() {
+            transitionToScreen(5); // Go to team naming
+            // Focus on input after transition
+            setTimeout(() => {
+                document.getElementById('team-name-input').focus();
+            }, 400);
+        }
+
+        function validateTeamName() {
+            const input = document.getElementById('team-name-input');
+            const message = document.getElementById('validation-message');
+            const button = document.getElementById('submit-button');
+            const value = input.value.trim();
+
+            // Reset states
+            input.classList.remove('error', 'success');
+            message.classList.remove('error', 'success');
+
+            if (value.length === 0) {
+                button.disabled = true;
+                return;
+            }
+
+            if (value.length < 2) {
+                input.classList.add('error');
+                message.classList.add('error');
+                message.textContent = 'Team name must be at least 2 characters';
+                button.disabled = true;
+            } else if (value.length > 50) {
+                input.classList.add('error');
+                message.classList.add('error');
+                message.textContent = 'Team name must be less than 50 characters';
+                button.disabled = true;
+            } else {
+                input.classList.add('success');
+                message.classList.add('success');
+                message.textContent = '✓ Looks good!';
+                button.disabled = false;
+            }
+        }
+
+        function submitTeamName() {
+            const input = document.getElementById('team-name-input');
+            teamName = input.value.trim();
+            console.log('Team name submitted:', teamName);
+            completeSimulation();
+        }
+
+        function completeSimulation() {
+            transitionToScreen(6); // Go to completion screen
+        }
+
+        function restartSimulation() {
+            // Reset state
+            selectedUseCase = '';
+            teamName = '';
+            document.getElementById('team-name-input').value = '';
+
+            // Go back to cover screen
+            transitionToScreen(0);
+        }
+
+        function closeSimulation() {
+            alert('In a real implementation, this would close the simulation window. Thank you for completing the Scribe onboarding!');
+        }
+
+        // ===== GUIDANCE SYSTEM =====
+        function updateGuidance() {
+            // Hide all guidance elements first
+            const arrows = document.querySelectorAll('.guidance-arrow');
+            const tooltips = document.querySelectorAll('.tooltip');
+
+            arrows.forEach(arrow => arrow.classList.remove('active'));
+            tooltips.forEach(tooltip => tooltip.classList.remove('active'));
+
+            // Show guidance based on current screen
+            switch(currentScreen) {
+                case 1: // Homepage
+                    // Arrows and tooltips are inline in HTML
+                    break;
+                case 2: // Sign in
+                    const signinArrow = document.getElementById('signin-arrow');
+                    const signinTooltip = document.getElementById('signin-tooltip');
+                    if (signinArrow && signinTooltip) {
+                        signinArrow.classList.add('active');
+                        signinTooltip.classList.add('active');
+                    }
+                    break;
+            }
+        }
+
+        // ===== INITIALIZATION =====
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('Scribe simulation loaded');
+            updateGuidance();
+        });
+
+        // ===== KEYBOARD NAVIGATION =====
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                if (currentScreen > 0) {
+                    goBack();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
